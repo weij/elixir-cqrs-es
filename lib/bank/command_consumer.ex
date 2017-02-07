@@ -10,7 +10,16 @@ defmodule Bank.CommandConsumer do
   	{:via, Registry, {:bank_process_registry, consumer_id}}
   end
 
+  # Callbacks
+
   def init(:ok) do
   	{:consumer, :ok, subscribe_to: [via_tuple(Bank.CommandProducer)]}
+  end
+
+  def handle_events(events, _from, state) do
+  	for event <- events do
+  	  IO.inspect {self(), event}
+  	end
+  	{:noreply, [], state}
   end
 end

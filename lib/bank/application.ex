@@ -11,8 +11,7 @@ defmodule Bank.Application do
     # Define workers and child supervisors to be supervised
     children = [
       supervisor(Registry, [:unique, :bank_process_registry]),
-      worker(Bank.CommandProducer, [Bank.CommandProducer]),
-      worker(Bank.CommandConsumer, [Bank.CommandConsumer])
+      supervisor(Bank.CommandSupervisor, [], name: Bank.CommandSupervisor)
       # Starts a worker by calling: Bank.Worker.start_link(arg1, arg2, arg3)
       # worker(Bank.Worker, [arg1, arg2, arg3]),
     ]
