@@ -2,6 +2,7 @@ defmodule Bank.CommandConsumer do
   use GenStage
 
   alias Bank.Commands.{CreateAccount, DepositMoney, WithdrawMoney}
+  alias Bank.Account
 
   def start_link(consumer_id) do
   	name = via_tuple(consumer_id)
@@ -20,21 +21,29 @@ defmodule Bank.CommandConsumer do
 
   def handle_events(events, from, state) do
     for event <- events do
-      handle_event(event)
+      process_event(event)
     end
 
   	{:noreply, [], state}
   end
 
-  defp handle_event(%CreateAccount{}) do
-  	IO.puts "just create a new account"
+  defp process_event(%CreateAccount{} = command) do
+  	IO.puts "Command Consumer: Create Account"
+    case Registry.lookup(:bank_process_registry, command.id) do
+      [] -> 
+      	IO.puts "accound.new"
+      	Account.new(command.id)
+      [{_pid, _value}] ->
+        IO.puts "the account exists" 
+      	:all_ready_created
+    end
   end
 
-  defp handle_event(%DepositMoney{amount: amount} = event) do
+  defp process_event(%DepositMoney{amount: amount} = event) do
   	IO.puts "deposit money: #{amount}"
   end
 
-  defp handle_event(%WithdrawMoney{amount: amount}) do
+  defp process_event(%WithdrawMoney{amount: amount}) do
   	IO.puts "withdraw money: #{amount}"
   end
 
