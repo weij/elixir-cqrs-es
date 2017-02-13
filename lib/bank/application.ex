@@ -7,7 +7,8 @@ defmodule Bank.Application do
 
   def start(_type, _args) do
     import Supervisor.Spec, warn: false
-
+    
+    Bank.EventStore.init()
     # Define workers and child supervisors to be supervised
     children = [
       supervisor(Registry, [:unique, :bank_process_registry]),

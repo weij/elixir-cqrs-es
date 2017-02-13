@@ -2,7 +2,7 @@ defmodule Bank.CommandConsumer do
   use GenStage
 
   alias Bank.Commands.{CreateAccount, DepositMoney, WithdrawMoney}
-  alias Bank.Account
+  alias Bank.{Account, AccountRepo}
 
   def start_link(consumer_id) do
   	name = via_tuple(consumer_id)
@@ -32,7 +32,9 @@ defmodule Bank.CommandConsumer do
     case Registry.lookup(:bank_process_registry, command.id) do
       [] -> 
       	IO.puts "accound.new"
-      	Account.new(command.id)
+      	pid = Account.new(command.id)
+      	Account.create(pid, command)
+        AccountRepo.save(pid)
       [{_pid, _value}] ->
         IO.puts "the account exists" 
       	:all_ready_created
