@@ -1,6 +1,8 @@
 defmodule Bank.CommandConsumer do
   use GenStage
 
+  require Logger
+
   alias Bank.Commands.{CreateAccount, DepositMoney, WithdrawMoney}
   alias Bank.{Account, AccountRepo}
 
@@ -43,6 +45,13 @@ defmodule Bank.CommandConsumer do
 
   defp process_event(%DepositMoney{amount: amount} = event) do
   	IO.puts "deposit money: #{amount}"
+  	case Registry.lookup(:bank_process_registry, event.id) do
+  	  [] ->
+        Logger.error("No account found for: ~p~n",[event.id])
+  	  [{pid, value}] ->
+        Account.deposit(pid, event.amount)
+        AccountRepo.save(pid)   
+  	end
   end
 
   defp process_event(%WithdrawMoney{amount: amount}) do
