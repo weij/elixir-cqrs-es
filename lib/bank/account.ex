@@ -2,7 +2,7 @@ defmodule Bank.Account do
   require Logger
 
   ## Default Timeout
-  @timeout 60000
+  @timeout 180000
 
   defmodule State do
     defstruct [:id, :date_created, :balance, :changes]
