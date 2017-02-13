@@ -1,8 +1,13 @@
 defmodule Bank.EventStore do
+  @doc """
+  EvantStore has following characterists:
+  1. wrapps persistence storage as well as append operation
+  2. represents one or more topics that allow publish-subscribe by consumers. In Bank case, 
+     account id is a topic. Anyone subscribes event related to this account, they will be notified.
+  3. get events from an offset
+  """
+  
   @table_id __MODULE__
-
-  ## Event Bus
-  # alias Bank.EventBus
 
   def init() do
     :ets.new(@table_id, [:public, :named_table])

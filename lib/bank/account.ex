@@ -1,7 +1,7 @@
 defmodule Bank.Account do
   require Logger
 
-  ## Default Timeout
+  ## Default Timeout - 180 seconds
   @timeout 180000
 
   defmodule State do
@@ -75,7 +75,7 @@ defmodule Bank.Account do
         loop(state)
     after
       @timeout ->
-        # AccountRepo.remove_from_cache(state.id)
+        # if this process exits, Registry will remove its record from the table
         exit(:normal)
     end
   end
