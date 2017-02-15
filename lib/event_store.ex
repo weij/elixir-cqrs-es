@@ -1,10 +1,13 @@
 defmodule Bank.EventStore do
   @doc """
-  EvantStore has following characterists:
-  1. wrapps persistence storage as well as append operation
-  2. represents one or more topics that allow publish-subscribe by consumers. In Bank case, 
-     account id is a topic. Anyone subscribes event related to this account, they will be notified.
-  3. get events from an offset
+  
+  ## EvantStore has following characterists:
+    1. Allow ONLY append event into its storage on a topic
+    2. Prevent any remove events operation from its storage
+    3. Allow to take snapshot 
+    4. Allow to replay events from a snapshot/offset
+    5. Have pub-sub system in order to notify a topic subscriber/consumers to pull new events
+    6. Get events one-by-one from an offset
   """
   
   @table_id __MODULE__
@@ -16,9 +19,8 @@ defmodule Bank.EventStore do
   def append_events(key, events) do
     stored_events   = get_raw_events(key)
     new_event       = List.first(:lists.reverse(events))
-    combined_events = stored_events ++ Map.to_list(new_event)
+    combined_events = [new_event | stored_events]
     
-    IO.inspect combined_events
     :ets.insert(@table_id, {key, combined_events})
 
     IO.puts "Event Store Published Event"
@@ -27,10 +29,6 @@ defmodule Bank.EventStore do
 
   def get_events(key) do
     :lists.reverse(get_raw_events(key))
-  end
-
-  def delete(key) do
-    :ets.delete(@table_id, key)
   end
 
   def get_raw_events(key) do
