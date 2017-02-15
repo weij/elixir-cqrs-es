@@ -1,5 +1,11 @@
 defmodule Bank.Events do
-
+  
+  # thinking point: should modeling event as function instead, not num.
+  # Common elements in an event are:
+  # 1. unique id (related to who, not this event) - e.g. sessionId, 
+  # 2. event type,
+  # 3. timestamp, 
+  # 4. locations - e.g. ip address, lat/lng, pageURL 
   defmodule AccountCreated do
   	@type t :: __MODULE__
   	defstruct [:id, :date_created]
