@@ -21,7 +21,7 @@ defmodule Bank.CommandConsumer do
   	{:consumer, :ok, subscribe_to: [via_tuple(Bank.CommandProducer)]}
   end
 
-  def handle_events(events, from, state) do
+  def handle_events(events, _from, state) do
     for event <- events do
       process_event(event)
     end
@@ -29,28 +29,29 @@ defmodule Bank.CommandConsumer do
   	{:noreply, [], state}
   end
 
-  defp process_event(%CreateAccount{} = command) do
+  defp process_event(%CreateAccount{id: id}) do
   	IO.puts "Command Consumer: Create Account"
-    case Registry.lookup(:bank_process_registry, command.id) do
-      [] -> 
+    case AccountRepo.get_by_id(id) do
+      :not_found -> 
       	IO.puts "accound.new"
-      	pid = Account.new(command.id)
-      	Account.create(pid, command)
-        AccountRepo.save(pid)
-      [{_pid, _value}] ->
-        IO.puts "the account exists" 
+      	pid = Account.new(id) # spawn a new process for this account
+      	Account.create(pid, id)  # keep create event into the account state
+        AccountRepo.save(pid)         # save this create event into event store
+      {:ok, pid} ->
+        IO.puts "this account exists" 
+        IO.inspect pid
       	:all_ready_created
     end
   end
 
-  defp process_event(%DepositMoney{amount: amount} = event) do
+  defp process_event(%DepositMoney{id: id, amount: amount}) do
   	IO.puts "deposit money: #{amount}"
-  	case Registry.lookup(:bank_process_registry, event.id) do
-  	  [] ->
-        Logger.error("No account found for: ~p~n",[event.id])
-  	  [{pid, value}] ->
-        Account.deposit(pid, event.amount)
-        AccountRepo.save(pid)   
+  	case AccountRepo.get_by_id(id) do
+  	  :not_found ->
+        Logger.error(["No account found for: ", id])
+  	  {:ok, pid} ->
+        Account.deposit(pid, amount) # send the account process message to change state and store new event
+        AccountRepo.save(pid)              # save all events from the account state into event store
   	end
   end
 

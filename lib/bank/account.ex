@@ -1,8 +1,8 @@
 defmodule Bank.Account do
   require Logger
 
-  ## Default Timeout - 180 seconds
-  @timeout 180000
+  ## Default Timeout
+  @timeout 60000
 
   defmodule State do
     defstruct [:id, :date_created, :balance, :changes]
@@ -62,7 +62,6 @@ defmodule Bank.Account do
 
       {:process_unsaved_changes, saver} ->
         saver.(state.id, :lists.reverse(state.changes))
-        IO.inspect state.changes
         new_state = %{state | :changes => state.changes}
         loop(new_state)
 
@@ -137,6 +136,8 @@ defmodule Bank.Account do
     state
   end
   
+  # replay every events for this account
+  # not affficient if the list of events a huge; should offset from a latest snapshot
   def apply_many_events([event|rest], state) do
     new_state = apply_event(event, state)
     apply_many_events(rest, new_state)
