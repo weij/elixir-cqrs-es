@@ -55,8 +55,16 @@ defmodule Bank.CommandConsumer do
   	end
   end
 
-  defp process_event(%WithdrawMoney{amount: amount}) do
+  defp process_event(%WithdrawMoney{id: id, amount: amount}) do
   	IO.puts "withdraw money: #{amount}"
+
+  	case AccountRepo.get_by_id(id) do
+  	  :not_found ->
+  	  	Logger.error(["No account found for: ", id])
+  	  {:ok, pid} ->
+        Account.withdraw(pid, amount)
+        AccountRepo.save(pid)
+  	end
   end
 
 end

@@ -93,7 +93,7 @@ defmodule Bank.Account do
 
   def attempt_command({:withdraw_money, amount}, state) do
     new_balance = state.balance - amount
-    IO.inspect(new_balance)
+    IO.inspect("new balance is: #{new_balance}")
     event = case new_balance < 0 do
       false ->
         %{%MoneyWithdrawn{} | :id => state.id, :amount => amount, :new_balance => new_balance, :transaction_date => :calendar.local_time}
