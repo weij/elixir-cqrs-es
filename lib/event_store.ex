@@ -1,7 +1,7 @@
 defmodule Bank.EventStore do
   @doc """
   
-  ## EvantStore has following characterists:
+  ## EvantStore is the single point of trust. It has following characterists:
     1. Allow ONLY append event into its storage on a topic
     2. Prevent any remove events operation from its storage
     3. Allow to take snapshot 

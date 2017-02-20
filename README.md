@@ -1,6 +1,8 @@
 # Bank
 
-**TODO: Add description**
+**TODO
+
+1. notify event subscribers to response the event in their onw purpose.
 
 ## Installation
 
